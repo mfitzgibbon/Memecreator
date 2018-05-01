@@ -1,8 +1,34 @@
 import './general';
+const deviceWidth = window.innerWidth;
 
 class Memes {
   constructor() {
     console.log("Memes JS File");
+    this.$topTextInput =document.querySelector('#imgCanvas');
+    this.$bottomTextInput = document.querySelector('#bottomText');
+    this.$imageInput = document.querySelector('#image');
+    this.$downloadButton = document.querySelector('#downloadMeme');
+    this.$canvas = document.querySelector('#imgCanvas');
+    this.$defaultImage = document.querySelector('#defaultImage');
+    this.image = this.$defaultImage
+    this.$context = this.$canvas.getContext('2d');
+    this.deviceWidth = window.innerWidth;
+
+    this.createCanvas();
+    this.createMeme();
+  }
+  createCanvas() {
+    let canvasHeight = Math.min(480, deviceWidth-30);
+    let canvasWidth = Math.min(640, deviceWidth-30);
+    this.$canvas.height = canvasHeight;
+    this.$canvas.width = canvasWidth;
+  }
+  createMeme(){
+    console.log('rendered');
+    this.$context.clearRect(0,0, this.$canvas.width, this.$canvas.height);
+    this.$canvas.height = this.image.height;
+    this.$canvas.width = this.image.width;
+    this.$context.drawImage(this.image, 0, 0);
   }
 }
 new Memes();
