@@ -1,4 +1,4 @@
-import './general';
+import './general.js';
 const deviceWidth = window.innerWidth;
 
 class Memes {
@@ -29,6 +29,10 @@ class Memes {
     this.$canvas.height = this.image.height;
     this.$canvas.width = this.image.width;
     this.$context.drawImage(this.image, 0, 0);
+  }
+  addEventListeners(){
+    this.$topTextInput.addEventListener('keyup', this.createMeme);
+    this.$bottomTextInput.addEventListener('keyup', this.createMeme);
   }
 }
 new Memes();
