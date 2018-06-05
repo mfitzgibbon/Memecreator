@@ -7,7 +7,7 @@ class Memes {
     this.$bottomTextInput = document.querySelector('#bottomText');
     this.$imageInput = document.querySelector('#image');
     this.$downloadButton = document.querySelector('#downloadMeme');
-    this.$canvas = document.querySelector('#imgCanvas');
+    this.$canvas = document.querySelector('canvas');
     this.$defaultImage = document.querySelector('#defaultImage');
     this.image = this.$defaultImage
     this.$context = this.$canvas.getContext('2d');
@@ -16,10 +16,12 @@ class Memes {
     this.createCanvas.bind(Memes);
     this.createMeme.bind(Memes);
     this.addEventListeners.bind(Memes);
+    this.downloadMeme.bind(Memes);
+    this.resizeCanvas.bind(Memes);
 
+    this.addEventListeners();
     this.createCanvas();
     this.createMeme();
-    this.addEventListeners();
   }
   createCanvas() {
     this.$canvas.width = Math.min(640, this.deviceWidth-30);
@@ -27,34 +29,79 @@ class Memes {
   }
   createMeme(){
     console.log('rendered');
+    console.log(this.$canvas);
+    console.log("context is " + this.$context);
+
     this.$context.clearRect(0,0, this.$canvas.width, this.$canvas.height);
     this.$canvas.height = this.image.height;
     this.$canvas.width = this.image.width;
+    this.resizeCanvas(this.$canvas.height, this.$canvas.width);
     this.$context.drawImage(this.image, 0, 0);
+
+
     const fontSize = ((this.$canvas.width+this.$canvas.height)*2)*4/100;
     this.$context.font = `${fontSize}pt sans-serif`;
     this.$context.textAlign = "center";
     this.$context.textBaseline = "top";
+    this.$context.lineJoin = "round";
     this.$context.lineWidth = fontSize/15;
     this.$context.strokeStyle = "black";
     this.$context.fillStyle = "white";
 
-    var topStr = this.$topTextInput.value;
-    topStr = topStr.toUpperCase();
+    const topStr = this.$topTextInput.value.toUpperCase();
     this.$context.fillText(topStr, this.$canvas.width/2, this.$canvas.height/10, this.$canvas.width);
     this.$context.strokeText(topStr,this.$canvas.width/2, this.$canvas.height/10, this.$canvas.width);
 
-    var bottomStr = this.$bottomTextInput.value;
-    bottomStr = bottomStr.toUpperCase();
+    const bottomStr = this.$bottomTextInput.value.toUpperCase();
     this.$context.fillText(bottomStr, this.$canvas.width/2, this.$canvas.height/1.5, this.$canvas.width);
     this.$context.strokeText(bottomStr,this.$canvas.width/2, this.$canvas.height/1.5, this.$canvas.width);
   }
   addEventListeners(){
-    this.$topTextInput.addEventListener('keyup', this.createMeme);
-    this.$bottomTextInput.addEventListener('keyup', this.createMeme);
+    this.createMeme = this.createMeme.bind(this);
+    this.downloadMeme = this.downloadMeme.bind(this);
+    this.loadImage = this.loadImage.bind(this);
+    this.resizeCanvas = this.resizeCanvas.bind(this);
+
+    let inputNodes = [this.$topTextInput, this.$bottomTextInput];
+
+    inputNodes.forEach(element => element.addEventListener('keyup', this.createMeme));
+    inputNodes.forEach(element => element.addEventListener('change', this.createMeme));
+    this.$imageInput.addEventListener('change', this.loadImage);
+    this.$downloadButton.addEventListener('click', this.downloadMeme);
   }
+
+  downloadMeme(){
+    const imageSource = this.$canvas.toDataURL('image/png');
+    this.$downloadButton.setAttribute('href', imageSource);
+  }
+
+  loadImage() {
+    if (this.$imageInput.files && this.$imageInput.files[0]){
+      let reader = new FileReader();
+      reader.onload = () => {
+        this.image = new Image();
+        this.image.onload = () => {
+          this.createMeme();
+        };
+        this.image.src = reader.result;
+      };
+      reader.readAsDataURL(this.$imageInput.files[0]);
+    }
+  }
+
+  resizeCanvas(canvasHeight, canvasWidth) {
+    let height = canvasHeight;
+    let width = canvasWidth;
+    while(height > Math.min(1000, this.deviceWidth-30) && width > Math.min(1000, this.deviceWidth-30)) {
+      height /= 2;
+      width /= 2;
+    }
+    this.$canvas.style.height = `${height}px`;
+    this.$canvas.style.width = `${width}px`;
+  }
+
 }
-new Memes();
+window.addEventListener('load', () => new Memes());
 
 /*  
 Create a class called Memes
